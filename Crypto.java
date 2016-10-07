@@ -8,13 +8,15 @@ public abstract class Crypto {
 	*/
 	static final int MODE = 0;
 	static final int KEY = 1;
-	static final int PLAINTEXT = 2;
+	static final int INPUTTEXT = 2;
 
 	static final char ENC = 'e';
 	static final char DEC = 'd';
 
 	static final String ENCEXTENSION = ".enc";
 	static final String DECEXTENSION = ".dec";
+
+	static final int NUMBEROFROUNDS = 14;
 
 	/**
 	 * Read the contents of the file.
@@ -53,4 +55,14 @@ public abstract class Crypto {
 	 * Print sample command usage to help the user to get started with the program.
 	*/
 	abstract public void printSampleCommandUsage();
+
+	/**
+	 * Encrypt the message
+	*/
+	abstract public void encryption();
+
+	/**
+	 * Decrypt the message
+	*/
+	abstract public void decryption();
 }

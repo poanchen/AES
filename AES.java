@@ -17,7 +17,7 @@ public class AES extends Crypto {
 	static String keyFileName = null;
 	static String inputFileName = null;
 	static String key = "";
-	static String plainText = "";
+	static String inputText = "";
 	static String contentForWrite = "";
 	final char forward[] = {
 		0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -55,7 +55,7 @@ public class AES extends Crypto {
 		0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
 		0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 	};
-	
+
 	public String readFile(String fileName) {
 		String lineFromInputFile = null;
 		String result = "";
@@ -136,6 +136,48 @@ public class AES extends Crypto {
 		System.out.println("For example, java AES e key.txt plaintext.txt");
 		System.exit(1);
 	}
+
+	/**
+	 * 
+	 */
+	public void subBytes() {
+
+	}
+
+	/**
+	 * 
+	 */
+	public void shiftRows() {
+
+	}
+
+	/**
+	 * 
+	 */
+	public void mixColumns() {
+
+	}
+
+	/**
+	 * 
+	 */
+	public void addRoundkey() {
+
+	}
+
+	public void encryption() {
+		System.out.println("lets encrypt something!");
+		for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
+			subBytes();
+			shiftRows();
+			mixColumns();
+			addRoundkey();
+		}
+	}
+
+	public void decryption() {
+		System.out.println("lets decrypt something!");
+	}
 	
 	public static void main(String[] args) throws Exception {
 		AES aes_265 = new AES();
@@ -144,20 +186,38 @@ public class AES extends Crypto {
 			if (args[MODE].length() > 1) aes_265.printSampleCommandUsage();
 			mode = args[MODE].charAt(0);
 			keyFileName = args[KEY];
-			inputFileName = args[PLAINTEXT];
+			inputFileName = args[INPUTTEXT];
 		}catch(ArrayIndexOutOfBoundsException e) {
 			aes_265.printSampleCommandUsage();
 		}
 
+		/**
+	 	* Making sure if the user inputted parameters are what we expected.
+	 	*/
 		aes_265.checkEmpty();
 		aes_265.checkIfValidMode();
+
+		/**
+	 	* Now, we should have the key as String from the key file.
+	 	*/
 		key = aes_265.readFile(keyFileName);
-		System.out.println("THE KEY IS");
-		System.out.println(key);
-		plainText = aes_265.readFile(inputFileName);
-		System.out.println("THE INPUT IS");
-		System.out.println(plainText);
-		contentForWrite = "this is a test haha";
-		aes_265.writeFile(keyFileName);
+		// System.out.println("THE KEY IS");
+		// System.out.println(key);
+
+		/**
+	 	* Now, we should have the message or text from the user's inputted file.
+	 	*/
+		inputText = aes_265.readFile(inputFileName);
+		// System.out.println("THE INPUT IS");
+		// System.out.println(inputText);
+
+		if (new Character(mode).compareTo(ENC) == 0) {
+			aes_265.encryption();
+		}else {
+			aes_265.decryption();
+		}
+
+		// contentForWrite = "this is a test haha";
+		// aes_265.writeFile(keyFileName);
 	}
 }
