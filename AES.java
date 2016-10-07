@@ -164,6 +164,10 @@ public class AES extends Crypto {
 	public void addRoundkey() {
 
 	}
+	public static void frontLookUp(byte a){
+		int i = (int)a;
+		System.out.println(i);
+	}
 
 	public void encryption() {
 		System.out.println("lets encrypt something!");
@@ -216,7 +220,7 @@ public class AES extends Crypto {
 		}else {
 			aes_265.decryption();
 		}
-
+		
 		// contentForWrite = "this is a test haha";
 		// aes_265.writeFile(keyFileName);
 	}
