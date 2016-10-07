@@ -1,55 +1,127 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.lang.*;
 import java.io.File;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * Abstract extension of {@code Crypto}.
+ */
 public class AES extends Crypto {
+	/**
+	 * Global variables to be use later.
+	 */
+	static char mode = 0;
+	static String keyFileName = null;
+	static String inputFileName = null;
+	static String key = "";
+	static String plainText = "";
+	static String contentForWrite = "";
 
-	static final int MODE = 0;
-	static final int KEY = 1;
-	static final int PLAINTEXT = 2;
+	public String readFile(String fileName) {
+		String lineFromInputFile = null;
+		String result = "";
+		BufferedReader fileReader = null;
+		File inputFileName = new File(fileName);
 
-	static final char ENC = 'e';
-	static final char DEC = 'd';
-	
-	public void test() {
-		System.out.println("Call to test");
-	}
-	public static void read(BufferedReader a){
 		try{
-			String  rl = null;
-			while ((rl = a.readLine()) != null) {
-            System.out.println(rl);
-			}  
-		 }
-		catch (IOException e) {
+			fileReader = new BufferedReader(new FileReader(fileName));
+			while ((lineFromInputFile = fileReader.readLine()) != null) {
+				result += lineFromInputFile;
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("Warning, '" + fileName + "' cannot be found! Please try again!");
+		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		} finally {
+			try{
+				if (fileReader != null) {
+					fileReader.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+
+	public void writeFile(String fileName) {
+		String fileExtension = null;
+		FileOutputStream fileWriter = null;
+		File inputFileName;
+		
+		if (new Character(mode).compareTo(ENC) == 0) {
+			fileExtension = ENCEXTENSION;
+		}else {
+			fileExtension = DECEXTENSION;
+		}
+		inputFileName = new File(fileName + fileExtension);
+
+		try{
+			if (!inputFileName.exists()) {
+				inputFileName.createNewFile();
+			}
+			fileWriter = new FileOutputStream(inputFileName, false);
+			byte[] contentInBytes = contentForWrite.getBytes();
+			fileWriter.write(contentInBytes);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try{
+				if (fileWriter != null) {
+					fileWriter.flush();
+					fileWriter.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void checkEmpty() {
+		if (mode == 0 || keyFileName == null || inputFileName == null) {
+			System.out.println("Paramters cannot be empty!");
+			System.exit(1);
+		}
+	}
+
+	public void checkIfValidMode() {
+		if (new Character(mode).compareTo(ENC) != 0 && new Character(mode).compareTo(DEC) != 0) {
+			printSampleCommandUsage();
+			System.exit(1);
+		}
+	}
+
+	public void printSampleCommandUsage() {
+		System.out.println("Please make sure you have all the paramters or you have the correct mode!");
+		System.out.println("For example, java AES [mode] [key file name] [input file name]");
+		System.out.println("For example, java AES e key.txt plaintext.txt");
+		System.exit(1);
 	}
 	
 	public static void main(String[] args) throws Exception {
 		AES aes_265 = new AES();
-		File key = new File(args[KEY]);
-		File input = new File(args[PLAINTEXT]);
-		BufferedReader keyReader = new BufferedReader(new FileReader(key));
-		BufferedReader inputReader = new BufferedReader(new FileReader(input));
-		System.out.println("Hello World!");
-		aes_265.test();
 		
-		System.out.println("THE KEY IS\n");
-		read(keyReader);
-		System.out.println("THE INPUT IS\n");
-		read(inputReader);
-		keyReader.close();
-		inputReader.close();
-		
-		//System.out.println(args[MODE]);
-		//System.out.println(args[KEY]);
-		//System.out.println(args[PLAINTEXT]);
-		// open file in java
-		// http://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
+		try{
+			if (args[MODE].length() > 1) aes_265.printSampleCommandUsage();
+			mode = args[MODE].charAt(0);
+			keyFileName = args[KEY];
+			inputFileName = args[PLAINTEXT];
+		}catch(ArrayIndexOutOfBoundsException e) {
+			aes_265.printSampleCommandUsage();
+		}
+
+		aes_265.checkEmpty();
+		aes_265.checkIfValidMode();
+		key = aes_265.readFile(keyFileName);
+		System.out.println("THE KEY IS");
+		System.out.println(key);
+		plainText = aes_265.readFile(inputFileName);
+		System.out.println("THE INPUT IS");
+		System.out.println(plainText);
+		contentForWrite = "this is a test haha";
+		aes_265.writeFile(keyFileName);
 	}
 }
