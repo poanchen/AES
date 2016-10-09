@@ -1,10 +1,6 @@
 import java.lang.*;
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 /**
  * Abstract extension of {@code Crypto}.
@@ -19,7 +15,7 @@ public class AES extends Crypto {
 	static String key = "";
 	static String inputText = "";
 	static String contentForWrite = "";
-	final char forward[] = {
+	static final char forward[] = {
 		0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
 		0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
 		0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
@@ -37,7 +33,7 @@ public class AES extends Crypto {
 		0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
 		0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
 	};
-	final char inverse[] = {
+	static final char inverse[] = {
 		0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
 		0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
 		0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E,
@@ -140,8 +136,13 @@ public class AES extends Crypto {
 	/**
 	 * 
 	 */
-	public void subBytes() {
-
+	public int [][] subBytes(int [][] intArray) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				intArray[i][j] = forwardTableLookUp(intArray[i][j]);
+			}
+		}
+		return intArray;
 	}
 
 	/**
@@ -164,22 +165,86 @@ public class AES extends Crypto {
 	public void addRoundkey() {
 
 	}
-	public static void frontLookUp(byte a){
-		int i = (int)a;
-		System.out.println(i);
+
+	public static char forwardTableLookUp(int a) {
+		return forward[a];
 	}
 
-	public void encryption() {
-		System.out.println("lets encrypt something!");
-		for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
-			subBytes();
+	public int [][] convert16BytesToFourByFourArray(String sixteenBytesString) {
+		int a = 0;
+		int [][] intArray = new int [4][4];
+		byte [] byteArrays = sixteenBytesString.getBytes();
+
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				try{
+					intArray[j][i] = byteArrays[a++];
+				} catch (IndexOutOfBoundsException e) {
+					intArray[j][i] = 0;
+				}
+			}
+		}
+		return intArray;
+	}
+
+	public void startEncryption(int [][] intArray) {
+		// increment this to check the result
+		int check = 1;
+		int check1 = check - 1;
+		
+		for (int i = 0; i < check; i++) {
+		// for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
+
+			if (i == check1) {
+				for (int k = 0; k < 4; k++) {
+					System.out.print("{");
+					for (int j = 0; j < 4; j++) {
+						System.out.print(intArray[k][j]);
+						if (j + 1 != 4) {
+							System.out.print(",");
+						}else{
+							System.out.print("}");
+						}
+					}
+					System.out.println();
+				}
+				System.out.println();
+			}
+
+			intArray = subBytes(intArray);
 			shiftRows();
 			mixColumns();
 			addRoundkey();
 		}
 	}
 
-	public void decryption() {
+	public void prepareToEncrypt() {
+		int count = 0;
+		int numberOfFourByFourByteArray = (int) Math.ceil((double)inputText.getBytes().length/16);
+		int [][] intArray = new int [4][4]; 
+		char [] inputTextInByte = inputText.toCharArray();
+		String sixteenBytesString = "";
+
+		for (int i = 0; i < inputTextInByte.length; i++) {
+			if (count < 16) {
+				sixteenBytesString += inputTextInByte[i];
+				count++;
+			}
+			if (count == 16) {
+				intArray = convert16BytesToFourByFourArray(sixteenBytesString);
+				startEncryption(intArray);
+				sixteenBytesString = "";
+				count = 0;
+			}
+		}
+
+		if (sixteenBytesString != "") {
+			intArray = convert16BytesToFourByFourArray(sixteenBytesString);
+			startEncryption(intArray);
+		}
+	}
+
+	public void prepareToDecrypt() {
 		System.out.println("lets decrypt something!");
 	}
 	
@@ -216,9 +281,9 @@ public class AES extends Crypto {
 		// System.out.println(inputText);
 
 		if (new Character(mode).compareTo(ENC) == 0) {
-			aes_265.encryption();
+			aes_265.prepareToEncrypt();
 		}else {
-			aes_265.decryption();
+			aes_265.prepareToDecrypt();
 		}
 		
 		// contentForWrite = "this is a test haha";

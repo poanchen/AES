@@ -59,10 +59,10 @@ public abstract class Crypto {
 	/**
 	 * Encrypt the message
 	*/
-	abstract public void encryption();
+	abstract public void prepareToEncrypt();
 
 	/**
 	 * Decrypt the message
 	*/
-	abstract public void decryption();
+	abstract public void prepareToDecrypt();
 }
