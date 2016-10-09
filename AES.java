@@ -148,8 +148,33 @@ public class AES extends Crypto {
 	/**
 	 * 
 	 */
-	public void shiftRows() {
-
+	public int[][] shiftRows(int[][] state) {
+		
+		
+		//shifting R1
+		int temp1 = state[1][0];
+		for(int i=0;i<3;i++){
+			state[1][i]=state[1][i+1];
+		}
+		state[1][3]=temp1;
+		
+		//shifting R2
+		int temp2 =state[2][0];
+		int temp3 =state[2][1];
+		for(int k=0;k<2;k++){
+			state[2][k]=state[2][k+2];
+		}
+		state[2][2]=temp2;
+		state[2][3]=temp3;
+		
+		//shifting R3
+		int temp4 =state[3][3];
+		for(int j=3;j>0;j--){
+			state[3][j]=state[3][j-1];
+		}
+		state[3][0]=temp4;
+		
+		return state;
 	}
 
 	/**
