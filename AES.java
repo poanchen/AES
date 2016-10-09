@@ -9,6 +9,7 @@ public class AES extends Crypto {
 	/**
 	 * Global variables to be use later.
 	 */
+	static int [][] keyExpansionArray = new int [4][60];
 	static char mode = 0;
 	static String keyFileName = null;
 	static String inputFileName = null;
@@ -76,6 +77,45 @@ public class AES extends Crypto {
 				e.printStackTrace();
 			}
 		}
+		return result;
+	}
+
+	public int [] readKey(String tempKey, int index) {
+		int a = 0;
+		int j = 0;
+		int [][] intArray = new int [4][4];
+		char [] keyInChar = new char [32];
+		char [] keyInByte = tempKey.toCharArray();
+		int [] result = new int [32];
+		String temp = "";
+
+		for(int i = 0; i < 32; i++) {
+			temp += keyInByte[i];
+			a++;
+
+			if (a == 2) {
+				result[j] = Integer.parseInt(temp.trim(), 16);
+				a = 0;
+				temp = "";
+				j++;
+			}
+		}
+		a = 0;
+		intArray = convert16BytesToFourByFourArray("", result);
+
+		for (int i = index; i < index + 4; i++) {
+			for (int q = 0; q < 4; q++) {
+				// System.out.print(q + "-" + a);
+				// System.out.print(q + "-" + i);
+				keyExpansionArray[q][i] = intArray[q][a];
+			}
+			a++;
+			// System.out.println(" ");
+		}
+		// 0-0 0-1 0-2 0-3 0-4 0-5 0-6 0-7
+		// 1-0 1-1 1-2 1-3 1-4 1-5 1-6 1-7
+		// 2-0 2-1 2-2 2-3 2-4 2-5 2-6 2-7
+		// 3-0 3-1 3-2 3-3 3-4 3-5 3-6 3-7
 		return result;
 	}
 
@@ -195,7 +235,7 @@ public class AES extends Crypto {
 		return forward[a];
 	}
 
-	public int [][] convert16BytesToFourByFourArray(String sixteenBytesString) {
+	public int [][] convert16BytesToFourByFourArray(String sixteenBytesString, int [] keyArray) {
 		int a = 0;
 		int [][] intArray = new int [4][4];
 		byte [] byteArrays = sixteenBytesString.getBytes();
@@ -203,7 +243,11 @@ public class AES extends Crypto {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				try{
-					intArray[j][i] = byteArrays[a++];
+					if (sixteenBytesString == "") {
+						intArray[j][i] = keyArray[a++];
+					}else{
+						intArray[j][i] = byteArrays[a++];
+					}
 				} catch (IndexOutOfBoundsException e) {
 					intArray[j][i] = 0;
 				}
@@ -237,36 +281,68 @@ public class AES extends Crypto {
 			}
 
 			intArray = subBytes(intArray);
-			shiftRows();
+			intArray = shiftRows(intArray);
 			mixColumns();
 			addRoundkey();
 		}
 	}
 
 	public void prepareToEncrypt() {
+		int a = 0;
 		int count = 0;
+		boolean flag = true;
 		int numberOfFourByFourByteArray = (int) Math.ceil((double)inputText.getBytes().length/16);
-		int [][] intArray = new int [4][4]; 
+		int [][] intArray = new int [4][4];
+		int [] keyInArray = new int [16];
+		char [] keyInByte = key.toCharArray();
 		char [] inputTextInByte = inputText.toCharArray();
+		String temp = "";
 		String sixteenBytesString = "";
 
-		for (int i = 0; i < inputTextInByte.length; i++) {
-			if (count < 16) {
-				sixteenBytesString += inputTextInByte[i];
-				count++;
+		for (int q = 0; q < 64; q++) {
+			if (a < 32) {
+				temp += keyInByte[q];
+				a++;
 			}
-			if (count == 16) {
-				intArray = convert16BytesToFourByFourArray(sixteenBytesString);
-				startEncryption(intArray);
-				sixteenBytesString = "";
-				count = 0;
+			if (a == 32) {
+				if (flag) {
+					readKey(temp, 0);
+					flag = false;
+				}else{
+					readKey(temp, 4);
+				}
+				temp = "";
+				a = 0;
 			}
 		}
 
-		if (sixteenBytesString != "") {
-			intArray = convert16BytesToFourByFourArray(sixteenBytesString);
-			startEncryption(intArray);
+		for (int o = 0; o < 8; o++) {
+			for (int u = 0; u < 4; u++) {
+				System.out.print(keyExpansionArray[u][o]);
+				// System.out.print(o);
+				// System.out.print(" ");
+				// System.out.print(u);
+			}
+			System.out.println();
 		}
+
+		// for (int i = 0; i < inputTextInByte.length; i++) {
+		// 	if (count < 16) {
+		// 		sixteenBytesString += inputTextInByte[i];
+		// 		count++;
+		// 	}
+		// 	if (count == 16) {
+		// 		intArray = convert16BytesToFourByFourArray(sixteenBytesString, new int [0]);
+		// 		startEncryption(intArray);
+		// 		sixteenBytesString = "";
+		// 		count = 0;
+		// 	}
+		// }
+
+		// if (sixteenBytesString != "") {
+		// 	intArray = convert16BytesToFourByFourArray(sixteenBytesString, new int [0]);
+		// 	startEncryption(intArray);
+		// }
 	}
 
 	public void prepareToDecrypt() {
