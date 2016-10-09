@@ -216,6 +216,52 @@ public class AES extends Crypto {
 		
 		return state;
 	}
+	public static void keyGen(){
+
+		char[] rcon = {0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a};
+		int temp;
+		int count=1;
+		int flag=0;
+		int [] tempcol=new int[4];
+		for(int j=8;j<60;j++){
+				if(j%4==0){
+					
+					for(int i=0;i<4;i++){
+						tempcol[i]=keyExpansionArray[i][j-1];
+					}
+					temp=tempcol[0];
+					if(flag==0){
+					for(int z=0;z<3;z++){
+						tempcol[z]=tempcol[z+1];
+					}
+					tempcol[3]=temp;
+					}
+					for(int x=0;x<4;x++){
+						tempcol[x]= forwardTableLookUp(tempcol[x]);
+					}
+					
+					for(int q=0;q<4;q++){
+						tempcol[q]= tempcol[q]^keyExpansionArray[q][j-8];
+					}
+					if(flag==0){
+					tempcol[0]=tempcol[0]^rcon[count++];
+						flag=1;
+					}else{
+						flag=0;
+					}
+					for(int o=0;o<4;o++){
+						keyExpansionArray[o][j]=tempcol[o];
+					}
+					
+				}else{
+					for(int h=0;h<4;h++){
+						keyExpansionArray[h][j]=keyExpansionArray[h][j-1]^keyExpansionArray[h][j-8];
+					}
+				}	
+				
+		}
+		
+	}
 
 	/**
 	 * 
@@ -315,8 +361,8 @@ public class AES extends Crypto {
 				a = 0;
 			}
 		}
-
-		for (int o = 0; o < 8; o++) {
+		keyGen();
+		for (int o = 0; o < 60; o++) {
 			for (int u = 0; u < 4; u++) {
 				System.out.print(keyExpansionArray[u][o]);
 				// System.out.print(o);
