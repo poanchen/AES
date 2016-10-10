@@ -228,6 +228,13 @@ public class AES extends Crypto {
 		}
 		return intArray;
 	}
+	public int[][] inverseSubBytes(int [][] intArray) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				intArray[i][j] = inverseTableLookUp(intArray[i][j]);
+			}
+		}
+	}
 
 	/**
 	 * 
@@ -257,6 +264,33 @@ public class AES extends Crypto {
 			state[3][j]=state[3][j-1];
 		}
 		state[3][0]=temp4;
+		
+		return state;
+	}
+	public int[][] inverseShiftRows(int[][] state) {
+		
+		//shifting R1
+		int temp1 = state[1][3];
+		for(int i=3;i>0;i--){
+			state[1][i]=state[1][i-1];
+		}
+		state[1][0]=temp1;
+		
+		//shifting R2
+		int temp2 =state[2][0];
+		int temp3 =state[2][1];
+		for(int k=0;k<2;k++){
+			state[2][k]=state[2][k+2];
+		}
+		state[2][2]=temp2;
+		state[2][3]=temp3;
+		
+		//shifting R3
+		int temp4 =state[3][0];
+		for(int j=0;j>3;j--){
+			state[3][j]=state[3][j+1];
+		}
+		state[3][3]=temp4;
 		
 		return state;
 	}
@@ -305,7 +339,7 @@ public class AES extends Crypto {
 		}
 	}
 
-	public static int getXorResultFrom2Array(int [] array1, int [] array2) {
+	public int getXorResultFrom2Array(int [] array1, int [] array2) {
 		int temp1 = 0, temp2 = 0, result = 0;
 		int [] miniArray = new int [4];
 
@@ -315,13 +349,13 @@ public class AES extends Crypto {
 			result = temp1 * temp2;
 
 			if (temp1 != 1 && temp2 != 1) {
-				temp1 = lTable[temp1];
-				temp2 = lTable[temp2];
+				temp1 = (int)lTable[temp1];
+				temp2 = (int)lTable[temp2];
 				result = temp1 + temp2;
 				if (result > 255) {
 					result -= 255;
 				}
-				result = eTable[result];
+				result = (int)eTable[result];
 			}
 			miniArray[j] = result;
 		}
@@ -353,9 +387,9 @@ public class AES extends Crypto {
 		// };
 
 		for(int j=0;j<4;j++) {
-			a = new int [] {message[0][j], message[1][j], message[2][j], message[3][j]};
+			a = new int [] {(int)message[0][j], (int)message[1][j], (int)message[2][j], (int)message[3][j]};
 			for(int i=0;i<4;i++) {
-				b = new int [] {galoisTable[i][0], galoisTable[i][1], galoisTable[i][2], galoisTable[i][3]};
+				b = new int [] {(int)galoisTable[i][0], (int)galoisTable[i][1], (int)galoisTable[i][2], (int)galoisTable[i][3]};
 				intArray[i][j] = getXorResultFrom2Array(a, b);
 
 				// System.out.print(" ");
@@ -419,6 +453,9 @@ public class AES extends Crypto {
 	public static char forwardTableLookUp(int a) {
 		return forward[a];
 	}
+	public static char inverseTableLookUp(int a) {
+		return inverse[a];
+	}
 
 	public int [][] convert16BytesToFourByFourArray(int [] inputArray) {
 		int a = 0;
@@ -438,21 +475,19 @@ public class AES extends Crypto {
 
 	public void startEncryption(int [][] intArray) {
 		// increment this to check the result
-		int check = 10;
+		int check = 9;
 		int check1 = check - 1;
 
 		intArray = addRoundkey(intArray, 0);
 		
-		// for (int i = 0; i < check; i++) {
-		for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
+		for (int i = 0; i < check; i++) {
+		// for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
 
 			// if (i == check1) {
 			// 	for (int k = 0; k < 4; k++) {
 			// 		System.out.print("{");
 			// 		for (int j = 0; j < 4; j++) {
-			// 			// System.out.print(intArray[k][j]);
-			// 			// System.out.print(k + " " + j);
-			// 			System.out.print("0x" + Integer.toHexString(intArray[k][j]));
+			// 			System.out.print(intArray[k][j]);
 			// 			if (j + 1 != 4) {
 			// 				System.out.print(",");
 			// 			}else{
@@ -467,12 +502,13 @@ public class AES extends Crypto {
 			intArray = subBytes(intArray);
 			intArray = shiftRows(intArray);
 			intArray = mixColumns(intArray);
+		
 			intArray = addRoundkey(intArray, i+1);
 		}
 
-		intArray = subBytes(intArray);
-		intArray = shiftRows(intArray);
-		intArray = addRoundkey(intArray, 14);
+		// intArray = subBytes(intArray);
+		// intArray = shiftRows(intArray);
+		// intArray = addRoundkey(intArray, 14);
 
 		for(int j=0;j<4;j++){
 			for(int i=0;i<4;i++){
@@ -589,29 +625,9 @@ public class AES extends Crypto {
 		inputText = aes_265.readFile(inputFileName);
 		// System.out.println("THE INPUT IS");
 		// System.out.println(inputText);
-
+		
 		if (new Character(mode).compareTo(ENC) == 0) {
 			aes_265.prepareToEncrypt();
-
-
-// {0x02, 0x03, 0x01, 0x01},
-		// {0x01, 0x02, 0x03, 0x01},
-		// {0x01, 0x01, 0x02, 0x03},
-		// {0x03, 0x01, 0x01, 0x02}
-
-
-
-			// int [] a = new int [4];
-			// int [] b = new int [4];
-			// int [] intArray = new int [4];
-			// a = new int [] {0x5a, 0x9a, 0x7f, 0x32};
-			// b = new int [] {0x02, 0x03, 0x01, 0x01};
-			// System.out.println("0x" + Integer.toHexString(getXorResultFrom2Array(a, b)));
-
-
-
-
-
 		}else {
 			aes_265.prepareToDecrypt();
 		}
