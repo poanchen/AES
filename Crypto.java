@@ -54,7 +54,7 @@ public abstract class Crypto {
 	/**
 	 * Check if the key file or input file contains invalid character.
 	*/
-	abstract public void checkIfContainsInvalidCharacter(String stringToCheck);
+	abstract public void checkIfContainsInvalidCharacter(String stringToCheck, boolean flag);
 
 	/**
 	 * Print sample command usage to help the user to get started with the program.

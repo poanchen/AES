@@ -113,7 +113,7 @@ public class AES extends Crypto {
 					System.out.println("Please make sure your key file includes exactly 64 characters!");
 					exitTheProgram();
 				}
-				checkIfContainsInvalidCharacter(lineFromInputFile);
+				checkIfContainsInvalidCharacter(lineFromInputFile, flag);
 				result += lineFromInputFile + "\n";
 			}
 		} catch (FileNotFoundException e) {
@@ -259,15 +259,21 @@ public class AES extends Crypto {
 		System.exit(1);
 	}
 
-	public void checkIfContainsInvalidCharacter(String stringToCheck) {
+	public void checkIfContainsInvalidCharacter(String stringToCheck, boolean flag) {
 		char [] characterInByte = stringToCheck.toCharArray();
 		String temp = "";
+		String typeOfFile = "";
 
 		for(int i = 0; i < characterInByte.length; i++) {
 			temp += characterInByte[i];
 			temp = temp.toLowerCase();
 			if (validCharacterSet.contains(temp) == false) {
-				System.out.println("Please make sure all the charcters in the input file is all valid charcter.");
+				if (flag) {
+					typeOfFile = "input file";
+				}else {
+					typeOfFile = "key file";
+				}
+				System.out.println("Please make sure all the charcters in the " + typeOfFile + " is all valid charcter.");
 				System.out.println("Valid charcter includes '0', '1', '2', '3', '4', '5', '6', '7,', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'");
 				exitTheProgram();
 			}
