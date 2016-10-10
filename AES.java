@@ -16,6 +16,7 @@ public class AES extends Crypto {
 	static String key = "";
 	static String inputText = "";
 	static String contentForWrite = "";
+	static Set<String> validCharacterSet = new HashSet<String>();
 	static final char eTable[] = {
 		0x01, 0x03, 0x05, 0x0F, 0x11, 0x33, 0x55, 0xFF, 0x1A, 0x2E, 0x72, 0x96, 0xA1, 0xF8, 0x13, 0x35,
 		0x5F, 0xE1, 0x38, 0x48, 0xD8, 0x73, 0x95, 0xA4, 0xF7, 0x02, 0x06, 0x0A, 0x1E, 0x22, 0x66, 0xAA,
@@ -95,7 +96,7 @@ public class AES extends Crypto {
 		{0x03, 0x01, 0x01, 0x02}
 	};
 
-	public String readFile(String fileName) {
+	public String readFile(String fileName, boolean flag) {
 		String lineFromInputFile = null;
 		String result = "";
 		BufferedReader fileReader = null;
@@ -104,10 +105,20 @@ public class AES extends Crypto {
 		try{
 			fileReader = new BufferedReader(new FileReader(fileName));
 			while ((lineFromInputFile = fileReader.readLine()) != null) {
-				result += lineFromInputFile;
+				if (lineFromInputFile.length() != 32 && flag) {
+					System.out.println("Please make sure each line in the input file is exactly 32 characters!");
+					exitTheProgram();
+				}
+				if (lineFromInputFile.length() != 64 && flag == false) {
+					System.out.println("Please make sure your key file includes exactly 64 characters!");
+					exitTheProgram();
+				}
+				checkIfContainsInvalidCharacter(lineFromInputFile);
+				result += lineFromInputFile + "\n";
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Warning, '" + fileName + "' cannot be found! Please try again!");
+			exitTheProgram();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -121,8 +132,6 @@ public class AES extends Crypto {
 		}
 		return result;
 	}
-
-	// pub
 
 	public int [] readKey(String tempKey, int index) {
 		int a = 0;
@@ -165,15 +174,20 @@ public class AES extends Crypto {
 
 	public void writeFile(String fileName) {
 		String fileExtension = null;
+		String newFileName = "";
+		String typeOfFile = "";
 		FileOutputStream fileWriter = null;
 		File inputFileName;
 		
 		if (new Character(mode).compareTo(ENC) == 0) {
 			fileExtension = ENCEXTENSION;
+			typeOfFile = " for encrypted message!";
 		}else {
 			fileExtension = DECEXTENSION;
+			typeOfFile = " for decrypted message!";
 		}
-		inputFileName = new File(fileName + fileExtension);
+		newFileName = fileName + fileExtension;
+		inputFileName = new File(newFileName);
 
 		try{
 			if (!inputFileName.exists()) {
@@ -182,6 +196,7 @@ public class AES extends Crypto {
 			fileWriter = new FileOutputStream(inputFileName, false);
 			byte[] contentInBytes = contentForWrite.getBytes();
 			fileWriter.write(contentInBytes);
+			System.out.print("Please check the " + newFileName + typeOfFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -196,17 +211,67 @@ public class AES extends Crypto {
 		}
 	}
 
+	public static void buildSet() {
+		boolean flag = false;
+
+		try {
+			validCharacterSet.add("0");
+			validCharacterSet.add("1");
+			validCharacterSet.add("2");
+			validCharacterSet.add("3");
+			validCharacterSet.add("4");
+			validCharacterSet.add("5");
+			validCharacterSet.add("6");
+			validCharacterSet.add("7");
+			validCharacterSet.add("8");
+			validCharacterSet.add("9");
+			validCharacterSet.add("a");
+			validCharacterSet.add("b");
+			validCharacterSet.add("c");
+			validCharacterSet.add("d");
+			validCharacterSet.add("e");
+			validCharacterSet.add("f");
+			if (validCharacterSet.size() != 16) flag = true;
+		} catch(Exception e) {
+			flag = true;
+		}
+		if (validCharacterSet.size() != 16) {
+			System.out.println("Something went wrong...Please check back!");
+			exitTheProgram();
+		}
+	}
+
 	public void checkEmpty() {
 		if (mode == 0 || keyFileName == null || inputFileName == null) {
 			System.out.println("Parameters cannot be empty!");
-			System.exit(1);
+			exitTheProgram();
 		}
 	}
 
 	public void checkIfValidMode() {
 		if (new Character(mode).compareTo(ENC) != 0 && new Character(mode).compareTo(DEC) != 0) {
 			printSampleCommandUsage();
-			System.exit(1);
+			exitTheProgram();
+		}
+	}
+	public static void exitTheProgram() {
+		System.out.print("Good Bye~");
+		System.exit(1);
+	}
+
+	public void checkIfContainsInvalidCharacter(String stringToCheck) {
+		char [] characterInByte = stringToCheck.toCharArray();
+		String temp = "";
+
+		for(int i = 0; i < characterInByte.length; i++) {
+			temp += characterInByte[i];
+			temp = temp.toLowerCase();
+			if (validCharacterSet.contains(temp) == false) {
+				System.out.println("Please make sure all the charcters in the input file is all valid charcter.");
+				System.out.println("Valid charcter includes '0', '1', '2', '3', '4', '5', '6', '7,', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'");
+				exitTheProgram();
+			}
+			temp = "";
 		}
 	}
 
@@ -214,7 +279,7 @@ public class AES extends Crypto {
 		System.out.println("Please make sure you have all the paramters or you have the correct mode!");
 		System.out.println("For example, java AES [mode] [key file name] [input file name]");
 		System.out.println("For example, java AES e key.txt plaintext.txt");
-		System.exit(1);
+		exitTheProgram();
 	}
 
 	/**
@@ -312,9 +377,11 @@ public class AES extends Crypto {
 		for(int j=0;j<4;j++){
 			temp1 = array1[j];
 			temp2 = array2[j];
+			// System.out.print(temp2);
+			// System.out.print(" ");
 			result = temp1 * temp2;
 
-			if (temp1 != 1 && temp2 != 1) {
+			if (temp1 != 1 && temp2 != 1 && temp1 != 0 && temp2 != 0) {
 				temp1 = lTable[temp1];
 				temp2 = lTable[temp2];
 				result = temp1 + temp2;
@@ -322,6 +389,8 @@ public class AES extends Crypto {
 					result -= 255;
 				}
 				result = eTable[result];
+				// System.out.print(result);
+				// System.out.print(" ");
 			}
 			miniArray[j] = result;
 		}
@@ -438,8 +507,10 @@ public class AES extends Crypto {
 
 	public void startEncryption(int [][] intArray) {
 		// increment this to check the result
-		int check = 10;
-		int check1 = check - 1;
+		// int check = 11;
+		// int check1 = check - 1;
+		String temp = "";
+		String debugWholeString = "";
 
 		intArray = addRoundkey(intArray, 0);
 		
@@ -475,21 +546,36 @@ public class AES extends Crypto {
 		intArray = addRoundkey(intArray, 14);
 
 		for(int j=0;j<4;j++){
+			// System.out.print("{");
 			for(int i=0;i<4;i++){
-				System.out.print("0x" + Integer.toHexString(intArray[j][i]));
-				System.out.print(",");
+				temp = Integer.toHexString(intArray[j][i]);
+				if (temp.length() == 1) {
+					temp = "0" + temp;
+				}
+				// System.out.print("0x" + temp);
+				temp = Integer.toHexString(intArray[i][j]);
+				if (temp.length() == 1) {
+					temp = "0" + temp;
+				}
+				debugWholeString += temp;
+				if (i + 1 != 4) {
+					// System.out.print(",");
+				}else{
+					// System.out.print("}");
+				}
 			}
-			System.out.println();
+			// System.out.println();
 		}
+		contentForWrite += debugWholeString + "\n";
+		// System.out.print(debugWholeString + "\n");
 	}
 
 	public void prepareToEncrypt() {
 		int a = 0;
 		int count = 0;
 		boolean flag = true;
-		int numberOfFourByFourByteArray = (int) Math.ceil((double)inputText.getBytes().length/16);
+		// int numberOfFourByFourByteArray = (int) Math.ceil((double)inputText.getBytes().length/32);
 		int [][] intArray = new int [4][4];
-		int [] keyInArray = new int [16];
 		int [] inputFileInArray = new int [16];
 		char [] keyInByte = key.toCharArray();
 		char [] inputTextInByte = inputText.toCharArray();
@@ -531,6 +617,7 @@ public class AES extends Crypto {
 		// a = 0;
 
 		for (int i = 0; i < inputTextInByte.length; i++) {
+			if (inputTextInByte[i] == '\n') continue;
 			temp += inputTextInByte[i];
 			a++;
 
@@ -547,11 +634,6 @@ public class AES extends Crypto {
 				count = 0;
 			}
 		}
-
-		// if (sixteenBytesString != "") {
-		// 	intArray = convert16BytesToFourByFourArray(new int [0]);
-		// 	startEncryption(intArray);
-		// }
 	}
 
 	public void prepareToDecrypt() {
@@ -573,22 +655,23 @@ public class AES extends Crypto {
 		/**
 	 	* Making sure if the user inputted parameters are what we expected.
 	 	*/
+	 	buildSet();
 		aes_265.checkEmpty();
 		aes_265.checkIfValidMode();
 
 		/**
 	 	* Now, we should have the key as String from the key file.
 	 	*/
-		key = aes_265.readFile(keyFileName);
-		// System.out.println("THE KEY IS");
-		// System.out.println(key);
+		key = aes_265.readFile(keyFileName, false);
+		System.out.println("THE KEY IS");
+		System.out.println(key);
 
 		/**
 	 	* Now, we should have the message or text from the user's inputted file.
 	 	*/
-		inputText = aes_265.readFile(inputFileName);
-		// System.out.println("THE INPUT IS");
-		// System.out.println(inputText);
+		inputText = aes_265.readFile(inputFileName, true);
+		System.out.println("THE INPUT IS");
+		System.out.println(inputText);
 
 		if (new Character(mode).compareTo(ENC) == 0) {
 			aes_265.prepareToEncrypt();
@@ -604,19 +687,14 @@ public class AES extends Crypto {
 			// int [] a = new int [4];
 			// int [] b = new int [4];
 			// int [] intArray = new int [4];
-			// a = new int [] {0x5a, 0x9a, 0x7f, 0x32};
+			// a = new int [] {0x51, 0x0, 0xc5, 0xe0};
 			// b = new int [] {0x02, 0x03, 0x01, 0x01};
 			// System.out.println("0x" + Integer.toHexString(getXorResultFrom2Array(a, b)));
-
-
-
-
 
 		}else {
 			aes_265.prepareToDecrypt();
 		}
 		
-		// contentForWrite = "this is a test haha";
-		// aes_265.writeFile(keyFileName);
+		aes_265.writeFile(keyFileName);
 	}
 }

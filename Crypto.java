@@ -29,7 +29,7 @@ public abstract class Crypto {
 	 * @throws IOException
 	 *         Failed or interrupted I/O operations.
 	*/
-	abstract public String readFile(String fileName);
+	abstract public String readFile(String fileName, boolean flag);
 
 	/**
 	 * Write the contents of the @variable contentForWrite to the file.
@@ -52,17 +52,22 @@ public abstract class Crypto {
 	abstract public void checkIfValidMode();
 
 	/**
+	 * Check if the key file or input file contains invalid character.
+	*/
+	abstract public void checkIfContainsInvalidCharacter(String stringToCheck);
+
+	/**
 	 * Print sample command usage to help the user to get started with the program.
 	*/
 	abstract public void printSampleCommandUsage();
 
 	/**
-	 * Encrypt the message
+	 * Prepare to encrypt the message
 	*/
 	abstract public void prepareToEncrypt();
 
 	/**
-	 * Decrypt the message
+	 * Prepare to decrypt the message
 	*/
 	abstract public void prepareToDecrypt();
 }
