@@ -288,7 +288,11 @@ public class AES extends Crypto {
 	public int [][] subBytes(int [][] intArray) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
-				intArray[i][j] = forwardTableLookUp(intArray[i][j]);
+				if (new Character(mode).compareTo(ENC) == 0) {
+					intArray[i][j] = forwardTableLookUp(intArray[i][j]);
+				}else {
+					intArray[i][j] = inverseTableLookUp(intArray[i][j]);
+				}
 			}
 		}
 		return intArray;
@@ -298,8 +302,6 @@ public class AES extends Crypto {
 	 * 
 	 */
 	public int[][] shiftRows(int[][] state) {
-		
-		
 		//shifting R1
 		int temp1 = state[1][0];
 		for(int i=0;i<3;i++){
@@ -325,6 +327,40 @@ public class AES extends Crypto {
 		
 		return state;
 	}
+
+	/**
+	 * 
+	 */
+	public int[][] inverseShiftRows(int[][] state) {
+		//shifting R1
+		int temp1 = state[1][3];
+		for(int i=3;i>0;i--){
+			state[1][i]=state[1][i-1];
+		}
+		state[1][0]=temp1;
+		
+		//shifting R2
+		int temp2 =state[2][0];
+		int temp3 =state[2][1];
+		for(int k=0;k<2;k++){
+			state[2][k]=state[2][k+2];
+		}
+		state[2][2]=temp2;
+		state[2][3]=temp3;
+		
+		//shifting R3
+		int temp4 =state[3][0];
+		for(int j=0;j>3;j--){
+			state[3][j]=state[3][j+1];
+		}
+		state[3][3]=temp4;
+
+		return state;
+	}
+
+	/**
+	 * 
+	 */
 	public static void keyGen(){
 
 		char[] rcon = {0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a};
@@ -370,6 +406,9 @@ public class AES extends Crypto {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public static int getXorResultFrom2Array(int [] array1, int [] array2) {
 		int temp1 = 0, temp2 = 0, result = 0;
 		int [] miniArray = new int [4];
@@ -485,10 +524,23 @@ public class AES extends Crypto {
 		return message;
 	}
 
+	/**
+	 * 
+	 */
 	public static char forwardTableLookUp(int a) {
 		return forward[a];
 	}
 
+	/**
+	 * 
+	 */
+	public static char inverseTableLookUp(int a) {
+		return inverse[a];
+	}
+
+	/**
+	 * 
+	 */
 	public int [][] convert16BytesToFourByFourArray(int [] inputArray) {
 		int a = 0;
 		int [][] intArray = new int [4][4];
@@ -505,6 +557,9 @@ public class AES extends Crypto {
 		return intArray;
 	}
 
+	/**
+	 * 
+	 */
 	public void startEncryption(int [][] intArray) {
 		// increment this to check the result
 		// int check = 11;
