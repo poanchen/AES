@@ -750,6 +750,6 @@ public class AES extends Crypto {
 			aes_265.prepareToDecrypt();
 		}
 		
-		aes_265.writeFile(keyFileName);
+		aes_265.writeFile(inputFileName);
 	}
 }
