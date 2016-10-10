@@ -511,39 +511,40 @@ public class AES extends Crypto {
 			}
 		}
 		keyGen();
-		for (int o = 0; o < 60; o++) {
-			for (int u = 0; u < 4; u++) {
-				// System.out.print(keyExpansionArray[u][o]);
-				System.out.print(Integer.toHexString(keyExpansionArray[u][o]));
-				// System.out.print("0x" + Integer.toHexString(keyExpansionArray[u][o]));
-				// System.out.print(o);
-				System.out.print(" ");
-				// System.out.print(u);
-			}
-			System.out.println();
-			if ((o+1)%4==0) {
-				System.out.println("------------------------------");
-			}
-		}
-		// a = 0;
-
-		// for (int i = 0; i < inputTextInByte.length; i++) {
-		// 	temp += inputTextInByte[i];
-		// 	a++;
-
-		// 	if (a == 2) {
-		// 		inputFileInArray[count] = Integer.parseInt(temp.trim(), 16);
-		// 		a = 0;
-		// 		temp = "";
-		// 		count++;
+		// for (int o = 0; o < 60; o++) {
+		// 	for (int u = 0; u < 4; u++) {
+		// 		// System.out.print(keyExpansionArray[u][o]);
+		// 		// System.out.print(Integer.toHexString(keyExpansionArray[u][o]));
+		// 		// System.out.print(Integer.toHexString(keyExpansionArray[u][o]));
+		// 		// System.out.print("0x" + Integer.toHexString(keyExpansionArray[u][o]));
+		// 		// System.out.print(o);
+		// 		System.out.print(" ");
+		// 		// System.out.print(u);
 		// 	}
-
-		// 	if (count == 16) {
-		// 		intArray = convert16BytesToFourByFourArray(inputFileInArray);
-		// 		startEncryption(intArray);
-		// 		count = 0;
+		// 	System.out.println();
+		// 	if ((o+1)%4==0) {
+		// 		System.out.println("------------------------------");
 		// 	}
 		// }
+		// a = 0;
+
+		for (int i = 0; i < inputTextInByte.length; i++) {
+			temp += inputTextInByte[i];
+			a++;
+
+			if (a == 2) {
+				inputFileInArray[count] = Integer.parseInt(temp.trim(), 16);
+				a = 0;
+				temp = "";
+				count++;
+			}
+
+			if (count == 16) {
+				intArray = convert16BytesToFourByFourArray(inputFileInArray);
+				startEncryption(intArray);
+				count = 0;
+			}
+		}
 
 		// if (sixteenBytesString != "") {
 		// 	intArray = convert16BytesToFourByFourArray(new int [0]);
