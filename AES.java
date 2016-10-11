@@ -805,7 +805,7 @@ public class AES extends Crypto {
 		// System.out.print(debugWholeString + "\n");
 	}
 
-	public void prepareToEncrypt() {
+	public void prepareToEncOrDec() {
 		int a = 0;
 		int count = 0;
 		boolean flag = true;
@@ -870,10 +870,6 @@ public class AES extends Crypto {
 			}
 		}
 	}
-
-	public void prepareToDecrypt() {
-		System.out.println("lets decrypt something!");
-	}
 	
 	public static void main(String[] args) throws Exception {
 		AES aes_265 = new AES();
@@ -908,10 +904,6 @@ public class AES extends Crypto {
 		System.out.println("THE INPUT IS");
 		System.out.println(inputText);
 
-		if (new Character(mode).compareTo(ENC) == 0) {
-			aes_265.prepareToEncrypt();
-
-
 // {0x02, 0x03, 0x01, 0x01},
 		// {0x01, 0x02, 0x03, 0x01},
 		// {0x01, 0x01, 0x02, 0x03},
@@ -926,9 +918,7 @@ public class AES extends Crypto {
 			// b = new int [] {0x02, 0x03, 0x01, 0x01};
 			// System.out.println("0x" + Integer.toHexString(getXorResultFrom2Array(a, b)));
 
-		}else {
-			aes_265.prepareToEncrypt();
-		}
+		aes_265.prepareToEncOrDec();
 		aes_265.writeFile(inputFileName);
 	}
 }

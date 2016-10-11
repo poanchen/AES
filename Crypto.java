@@ -62,12 +62,7 @@ public abstract class Crypto {
 	abstract public void printSampleCommandUsage();
 
 	/**
-	 * Prepare to encrypt the message
+	 * Prepare to encrypt or decrypt the message
 	*/
-	abstract public void prepareToEncrypt();
-
-	/**
-	 * Prepare to decrypt the message
-	*/
-	abstract public void prepareToDecrypt();
+	abstract public void prepareToEncOrDec();
 }
