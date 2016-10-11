@@ -95,6 +95,12 @@ public class AES extends Crypto {
 		{0x01, 0x01, 0x02, 0x03},
 		{0x03, 0x01, 0x01, 0x02}
 	};
+	static final int iGfield[][] = {
+		{ 14, 11, 13, 9},
+		{ 9, 14, 11, 13},
+		{ 13, 9, 14, 11},
+		{ 11, 13, 9, 14}
+	};
 	static final char mulnine[] = {
 		0x00,0x09,0x12,0x1b,0x24,0x2d,0x36,0x3f,0x48,0x41,0x5a,0x53,0x6c,0x65,0x7e,0x77,
 		0x90,0x99,0x82,0x8b,0xb4,0xbd,0xa6,0xaf,0xd8,0xd1,0xca,0xc3,0xfc,0xf5,0xee,0xe7,
@@ -429,7 +435,7 @@ public class AES extends Crypto {
 		
 		//shifting R3
 		int temp4 =state[3][0];
-		for(int j=0;j>3;j--){
+		for(int j=0;j<3;j++){
 			state[3][j]=state[3][j+1];
 		}
 		state[3][3]=temp4;
@@ -572,12 +578,7 @@ public class AES extends Crypto {
 	}
 	public int [][] inverseMixColumns(int[][] input){
 	
-		int [][] iGfield = new int[][]{
-			{ 14, 11, 13, 9},
-			{ 9, 14, 11, 13},
-			{ 13, 9, 14, 11},
-			{ 11, 13, 9, 14}
-		};
+
 		int []c0=new int[4];
 		int []c1=new int[4];
 		int []c2=new int[4];
@@ -624,9 +625,9 @@ public class AES extends Crypto {
 				}
 			}
 		}
-		
-
+		return output;
 	}
+
 	public static int[] mulMatrix(int[] col, int[][] igf){
 		int [] temp = new int[4];
 		for(int i=0;i<4;i++){
@@ -637,7 +638,7 @@ public class AES extends Crypto {
 		}
 		return temp;
 	}
-	public static char mulLookUp(int m,int table){
+	public static char mulLookUp(int m, int table){
 		switch(table){
 			case 9:
 				return mulnine[m];
@@ -721,13 +722,19 @@ public class AES extends Crypto {
 	 */
 	public void startEncryption(int [][] intArray) {
 		// increment this to check the result
-		// int check = 11;
+		// int check = 1;
 		// int check1 = check - 1;
+		int q = 14;
 		String temp = "";
 		String debugWholeString = "";
 
-		intArray = addRoundkey(intArray, 0);
-		
+		if (new Character(mode).compareTo(ENC) == 0) {
+			intArray = addRoundkey(intArray, 0);
+		}else {
+			intArray = addRoundkey(intArray, q);
+			q--;
+		}
+
 		// for (int i = 0; i < check; i++) {
 		for (int i = 0; i < NUMBEROFROUNDS-1; i++) {
 
@@ -749,15 +756,29 @@ public class AES extends Crypto {
 			// 	System.out.println();
 			// }
 
-			intArray = subBytes(intArray);
-			intArray = shiftRows(intArray);
-			intArray = mixColumns(intArray);
-			intArray = addRoundkey(intArray, i+1);
+			if (new Character(mode).compareTo(ENC) == 0) {
+				intArray = subBytes(intArray);
+				intArray = shiftRows(intArray);
+				intArray = mixColumns(intArray);
+				intArray = addRoundkey(intArray, i+1);
+			}else {
+				intArray = inverseShiftRows(intArray);
+				intArray = subBytes(intArray);
+				intArray = addRoundkey(intArray, q);
+				intArray = inverseMixColumns(intArray);
+				q--;
+			}
 		}
 
-		intArray = subBytes(intArray);
-		intArray = shiftRows(intArray);
-		intArray = addRoundkey(intArray, 14);
+		if (new Character(mode).compareTo(ENC) == 0) {
+			intArray = subBytes(intArray);
+			intArray = shiftRows(intArray);
+			intArray = addRoundkey(intArray, 14);
+		}else {
+			intArray = inverseShiftRows(intArray);
+			intArray = subBytes(intArray);
+			intArray = addRoundkey(intArray, 0);
+		}
 
 		for(int j=0;j<4;j++){
 			// System.out.print("{");
@@ -906,7 +927,7 @@ public class AES extends Crypto {
 			// System.out.println("0x" + Integer.toHexString(getXorResultFrom2Array(a, b)));
 
 		}else {
-			aes_265.prepareToDecrypt();
+			aes_265.prepareToEncrypt();
 		}
 		aes_265.writeFile(inputFileName);
 	}
