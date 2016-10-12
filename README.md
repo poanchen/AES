@@ -1,5 +1,5 @@
-# AES-256
-AES-256 implementation in Java.
+# AES-256 (ECB)
+AES-256 (ECB) implementation in Java.
 
 ## Requirement
 - [Java SE Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
