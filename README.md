@@ -1,4 +1,4 @@
-# AES
+# AES-256
 AES-256 implementation in Java.
 
 ## Requirement
@@ -29,3 +29,6 @@ Run decryption command
 ```
 java AES d key plaintext.enc
 ```
+
+## Authors
+[Poan Chen](https://github.com/poanchen) and [Deon Liang](https://github.com/deoliang)
