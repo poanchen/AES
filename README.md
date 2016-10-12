@@ -1,4 +1,4 @@
-# AES-256
+# AES
 AES-256 implementation in Java.
 
 ## Requirement
