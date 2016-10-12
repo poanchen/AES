@@ -419,12 +419,12 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Given a four by four byte array, row 2 shifted left once, row 3 shifted left 3 times, and row 3 shifted left 4 times
 	 *
-	 * @param intArray
+	 * @param state
 	 *        2D int array (four by four int array)
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *        A 2D int array after the shifting has been done.
 	*/
 	public int[][] shiftRows(int[][] state) {
 		//shifting R1
@@ -454,12 +454,12 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 *Given a four by four byte array, row 2 shifted left once, row 3 shifted left 3 times, and row 3 shifted left 4 times
 	 *
-	 * @param intArray
+	 * @param state
 	 *        2D int array (four by four int array)
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *         A 2D int array after the shifting has been done.
 	*/
 	public int[][] inverseShiftRows(int[][] state) {
 		//shifting R1
@@ -489,12 +489,8 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Generate values to fill the 4 by 60 byte key array, by expanding the input key
 	 *
-	 * @param intArray
-	 *        2D int array (four by four int array)
-	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
 	*/
 	public static void keyGen(){
 
@@ -666,12 +662,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Given input 4 by 4 array, return the 4 by 4 array that is the result of performing the 
+	 * inverse mix columns operation on the input array
 	 *
-	 * @param intArray
-	 *        2D int array (four by four int array)
+	 * @param input
+	 *        4 by 4 int input array that undergoes the inverse mix columns operation
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *        A 4 by 4 int output array that has undergone the inverse 
 	*/
 	public int [][] inverseMixColumns(int[][] input){
 	
@@ -726,12 +723,15 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Given input column array and 4 by 4 array of the inverse galois field return column array that is result of matrix 
+	 * multiplication of column array with the inverse Galois field
 	 *
-	 * @param intArray
-	 *        2D int array (four by four int array)
+	 * @param col
+	 *        int array that is to be changed through matrix multiplication
+	 * @param igf
+	 *        2D int array that is the inverse galois field
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *        An int array that is result of matrix multiplication of column array with inverse galois field
 	*/
 	public static int[] mulMatrix(int[] col, int[][] igf){
 		int [] temp = new int[4];
@@ -745,12 +745,16 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Given integer m and integer table, return the result of their product by using lookup tables
+	 * 
+	 * Lookup tables obtained from https://en.wikipedia.org/wiki/Rijndael_mix_columns
 	 *
-	 * @param intArray
-	 *        2D int array (four by four int array)
+	 * @param m
+	 *        integer to be multiplied with table
+	 * @param table
+	 *        integer to be multiplied with m and indicate lookup table to use
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *        A char that is the result of the product of m and table number
 	*/
 	public static char mulLookUp(int m, int table){
 		switch(table){
@@ -767,12 +771,14 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * PUT YOUR DESCRIPTION HERE
+	 * Given a 4 by 4 message array and index indicating the current round return the message array XORed with current round key
 	 *
-	 * @param intArray
+	 * @param message
 	 *        2D int array (four by four int array)
+	 * @param index
+	 *        int indicating the round to use for extracting round key from the expanded 4 by 60 keyExpansionArray
 	 * @return
-	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	 *        A 2D int array that is result of message XORed with the current round key
 	*/
 	public static int[][] addRoundkey(int[][] message, int index) {
 		
