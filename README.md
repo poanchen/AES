@@ -5,7 +5,7 @@ AES-256 implementation in Java.
 - [Java SE Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
 
 ## Installation
-Once you have Java SE runtime environment set up, then you may run the following command to start encrypting your message.
+Once you have Java SE runtime environment set up, then you may run the following command to start with.
 ```
 git clone https://github.com/poanchen/AES.git
 cd AES
