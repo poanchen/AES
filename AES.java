@@ -1,9 +1,19 @@
-import java.lang.*;
-import java.io.*;
 import java.util.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;		
+import java.io.FileOutputStream;		
+import java.io.FileNotFoundException;		
+import java.io.IOException;
 
 /**
  * Abstract extension of {@code Crypto}.
+ *
+ * Inspired by these great resources.
+ * 
+ * Thanks for http://www.adamberent.com/documents/AESbyExample.pdf paper to help us understand how it actually works.
+ * Also, thanks for http://lpb.canb.auug.org.au/adfa/src/AEScalc/AEScalc.html for helping us to debug this method.
+ * As well as, this site too https://www.cs.utexas.edu/~byoung/cs361/assignment-aes.html.
  */
 public class AES extends Crypto {
 	/**
@@ -212,6 +222,16 @@ public class AES extends Crypto {
 		return result;
 	}
 
+	/**
+	 * Read 2 bytes at a time from the key. For example, ff10 will be read as (int)255, and (int)16 (two numbers).
+	 * (For key expanison)
+	 *
+	 * @param tempKey
+	 *        Half of the key (Should have exactly 32 bytes).
+	 * @param index
+	 *        where the key should be put in in the keyExpansionArray (First half of the key, or second half of the key)
+	 * @return an int array that contains half of the key.
+	*/
 	public int [] readKey(String tempKey, int index) {
 		int a = 0;
 		int j = 0;
@@ -290,6 +310,12 @@ public class AES extends Crypto {
 		}
 	}
 
+	/**
+	 * Using HashSet to store valid characters that will be useful for @method like checkIfContainsInvalidCharacter.
+	 * HashSet has reasonably fast access time, it allows us to see if the character is in the Set quickly.
+	 * @throws Exception
+	 *         When not being able to add items into the set.
+	*/
 	public static void buildSet() {
 		boolean flag = false;
 
@@ -333,6 +359,10 @@ public class AES extends Crypto {
 			exitTheProgram();
 		}
 	}
+
+	/**
+	 * Standard output the Good bye message and immediately exit the program.
+	*/
 	public static void exitTheProgram() {
 		System.out.print("Good Bye~");
 		System.exit(1);
@@ -368,8 +398,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * Given a four by four byte array, we use a nested for loop, one item at the time, and replaced them with the value in S-box.
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public int [][] subBytes(int [][] intArray) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -384,8 +419,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public int[][] shiftRows(int[][] state) {
 		//shifting R1
 		int temp1 = state[1][0];
@@ -414,8 +454,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public int[][] inverseShiftRows(int[][] state) {
 		//shifting R1
 		int temp1 = state[1][3];
@@ -444,8 +489,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public static void keyGen(){
 
 		char[] rcon = {0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a};
@@ -492,8 +542,36 @@ public class AES extends Crypto {
 	}
 
 	/**
+	 * For example,
+	 * Multiplication Matrix
+	 * ---------
+	 * |2 3 1 1|
+	 * ---------
+	 *  1 2 3 1
+	 *  1 1 2 3
+	 *  3 1 1 2
+	 * 16 byte state array
+	 * ----
+	 * |b1| b5 b9 b13
+	 * |b2| b6 b10 b14
+	 * |b3| b7 b11 b15
+	 * |b4| b8 b12 b16
+	 * ----
+	 * Long story short, given two int array above, this @method will calculate
+	 * (b1 * 2) XOR (b2*3) XOR (b3*1) XOR (b4*1).
 	 * 
-	 */
+	 * To handle the matrix multiplication, we apply the Galois Field Multiplication method with the help of E table and L table.
+	 * Thanks for http://www.adamberent.com/documents/AESbyExample.pdf paper to help us understand how it actually works.
+	 * Also, thanks for http://lpb.canb.auug.org.au/adfa/src/AEScalc/AEScalc.html for helping us to debug this method.
+	 * As well as, this site too https://www.cs.utexas.edu/~byoung/cs361/assignment-aes.html.
+	 *
+	 * @param array1
+	 *        int array with four numbers in there
+	 * @param array2
+	 *        int array with four numbers in there
+	 * @return
+	 *        the result of the calculation above.
+	*/
 	public static int getXorResultFrom2Array(int [] array1, int [] array2) {
 		int temp1 = 0, temp2 = 0, result = 0;
 		int [] miniArray = new int [4];
@@ -526,8 +604,18 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * Basically a nested for loop that will run 16 times. Each time, it will construct two int array and call @method
+	 * getXorResultFrom2Array to get their XOR result, one item at a time.
+	 *
+	 * Thanks for http://www.adamberent.com/documents/AESbyExample.pdf paper to help us understand how it actually works.
+	 * Also, thanks for http://lpb.canb.auug.org.au/adfa/src/AEScalc/AEScalc.html for helping us to debug this method.
+	 * As well as, this site too https://www.cs.utexas.edu/~byoung/cs361/assignment-aes.html.
+	 *
+	 * @param message
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has gone over mixColumns operation.
+	*/
 	public int [][] mixColumns(int[][] message) {
 		int count = 0;
 		int [][] intArray = new int [4][4];
@@ -576,6 +664,15 @@ public class AES extends Crypto {
 		// }
 		return intArray;
 	}
+
+	/**
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public int [][] inverseMixColumns(int[][] input){
 	
 
@@ -628,6 +725,14 @@ public class AES extends Crypto {
 		return output;
 	}
 
+	/**
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public static int[] mulMatrix(int[] col, int[][] igf){
 		int [] temp = new int[4];
 		for(int i=0;i<4;i++){
@@ -638,6 +743,15 @@ public class AES extends Crypto {
 		}
 		return temp;
 	}
+
+	/**
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public static char mulLookUp(int m, int table){
 		switch(table){
 			case 9:
@@ -653,8 +767,13 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * PUT YOUR DESCRIPTION HERE
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been replaced one item at a time from the S-Box.
+	*/
 	public static int[][] addRoundkey(int[][] message, int index) {
 		
 		int col = 4*index;
@@ -685,22 +804,47 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
+	 * Look up specific value from the forward Table.
+	 *
+	 * @param a
+	 *        an integer
+	 * @return
+	 *        the result from the S-box.
+	*/
 	public static char forwardTableLookUp(int a) {
 		return forward[a];
 	}
 
 	/**
-	 * 
-	 */
+	 * Look up specific value from the inverse Table.
+	 *
+	 * @param a
+	 *        an integer
+	 * @return
+	 *        the result from the inverse S-box.
+	*/
 	public static char inverseTableLookUp(int a) {
 		return inverse[a];
 	}
 
 	/**
-	 * 
-	 */
+	 * Given an array, convert them into a four by four int array.
+	 *
+	 * @param inputArray
+	 *        an array that contains 16 elements
+	 * @throws IndexOutOfBoundsException
+	 *         Index out of bound exception.
+	 * @return
+	 *        it will return a four by four int array without modification of the items.
+	 *        For example, given an array like this, {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+	 *        it would return something like this,
+	 *        {
+	 *            {1,5, 9,13},
+	 *            {2,6,10,14},
+	 *            {3,7,11,15},
+	 *            {4,8,12,16},
+	 *        }
+	*/
 	public int [][] convert16BytesToFourByFourArray(int [] inputArray) {
 		int a = 0;
 		int [][] intArray = new int [4][4];
@@ -718,9 +862,16 @@ public class AES extends Crypto {
 	}
 
 	/**
-	 * 
-	 */
-	public void startEncryption(int [][] intArray) {
+	 * Begin to encrypt or decrypt the message by calling the @method addRoundkey, @method subBytes, @method shiftRows, @method inverseShiftRows
+	 * , @method mixColumns, @method inverseMixColumns 16 times depends on it is a encryption or decryption process. At the end,
+	 * it will put all the result back to the @variable contentForWrite, so that we can use the @method writeFile for writing to the file.
+	 *
+	 * @param intArray
+	 *        2D int array (four by four int array)
+	 * @return
+	 *        A 2D int array that has been ran 14 rounds.
+	*/
+	public void startEncOrDec(int [][] intArray) {
 		// increment this to check the result
 		// int check = 1;
 		// int check1 = check - 1;
@@ -865,7 +1016,7 @@ public class AES extends Crypto {
 
 			if (count == 16) {
 				intArray = convert16BytesToFourByFourArray(inputFileInArray);
-				startEncryption(intArray);
+				startEncOrDec(intArray);
 				count = 0;
 			}
 		}
@@ -874,6 +1025,9 @@ public class AES extends Crypto {
 	public static void main(String[] args) throws Exception {
 		AES aes_265 = new AES();
 		
+		/**
+	 	* Getting user's input from the args array and store it in the global variable for other function to use.
+	 	*/
 		try{
 			if (args[MODE].length() > 1) aes_265.printSampleCommandUsage();
 			mode = args[MODE].charAt(0);
@@ -918,7 +1072,15 @@ public class AES extends Crypto {
 			// b = new int [] {0x02, 0x03, 0x01, 0x01};
 			// System.out.println("0x" + Integer.toHexString(getXorResultFrom2Array(a, b)));
 
+		/**
+	 	* Prepare the encryption or decryption process
+	 	*/
 		aes_265.prepareToEncOrDec();
+
+		/**
+	 	* When the program gets to this point, this means that we have successfully finish the encryption or decryption
+	 	* process, and we are ready to write the result to file for user to see.
+	 	*/
 		aes_265.writeFile(inputFileName);
 	}
 }
